@@ -41,6 +41,7 @@ class Chat extends StatefulWidget {
     this.customBottomWidget,
     this.customDateHeaderText,
     this.customMessageBuilder,
+    this.messageWidth,
     this.customStatusBuilder,
     this.dateFormat,
     this.dateHeaderBuilder,
@@ -125,6 +126,9 @@ class Chat extends StatefulWidget {
   /// See [Message.customMessageBuilder].
   final Widget Function(types.CustomMessage, {required int messageWidth})?
       customMessageBuilder;
+
+  /// See [Message.messageWidth].
+  final int Function(types.Message, BoxConstraints constraints)? messageWidth;
 
   /// See [Message.customStatusBuilder].
   final Widget Function(types.Message message, {required BuildContext context})?
@@ -432,10 +436,12 @@ class ChatState extends State<Chat> {
         messageWidget = widget.systemMessageBuilder?.call(message) ??
             SystemMessage(message: message.text);
       } else {
-        final messageWidth =
-            widget.showUserAvatars && message.author.id != widget.user.id
-                ? min(constraints.maxWidth * 0.72, 440).floor()
-                : min(constraints.maxWidth * 0.78, 440).floor();
+        // final defaultMessageWidth = widget.showUserAvatars && message.author.id != widget.user.id
+        //         ? min(constraints.maxWidth * 0.72, 440).floor()
+        //         : min(constraints.maxWidth * 0.78, 440).floor();
+        final defaultMessageWidth = (constraints.maxWidth).floor();
+        final messageWidth = widget.messageWidth?.call(message, constraints) ??
+            defaultMessageWidth;
 
         messageWidget = Message(
           audioMessageBuilder: widget.audioMessageBuilder,
